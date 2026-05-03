@@ -68,7 +68,7 @@ namespace AegisDynamics
                     {
                         ConfigureThrust();
                         lastRescaleIsp = currentVacIsp;
-                        waterfallScalesCaptured = false;  // re-capture after fuel/template change
+                        waterfallScalesCaptured = false;
                     }
                 }
                 return;
@@ -324,6 +324,9 @@ namespace AegisDynamics
 
     /// <summary>
     /// Active heatshield cooling: consumes propellant during reentry to dissipate heat flux.
+    /// Resource names are looked up by name (not cached IDs) so that B9PartSwitch DATA blocks
+    /// can change coolantResourceName/oxidizerResourceName at runtime when the player picks
+    /// a different fuel mode.
     /// </summary>
     public class ModuleAegisActiveCooling : PartModule
     {
@@ -344,24 +347,6 @@ namespace AegisDynamics
         [KSPField(guiActive = true, guiName = "Cooling Active")]
         public bool coolingActive = false;
 
-        private int coolantResourceID;
-        private int oxidizerResourceID;
-
-        public override void OnStart(StartState state)
-        {
-            base.OnStart(state);
-            ResolveResources();
-        }
-
-        private void ResolveResources()
-        {
-            var coolantDef = PartResourceLibrary.Instance.GetDefinition(coolantResourceName);
-            if (coolantDef != null) coolantResourceID = coolantDef.id;
-
-            var oxDef = PartResourceLibrary.Instance.GetDefinition(oxidizerResourceName);
-            if (oxDef != null) oxidizerResourceID = oxDef.id;
-        }
-
         public override void OnFixedUpdate()
         {
             if (!HighLogic.LoadedSceneIsFlight) return;
@@ -380,10 +365,11 @@ namespace AegisDynamics
             float fuelDemandPerSec = fluxToDissipate / coolingPerFuelUnit;
             float fuelDemand = fuelDemandPerSec * TimeWarp.fixedDeltaTime;
 
-            double fuelObtained = part.RequestResource(coolantResourceID, fuelDemand,
+            // Look up by name each call so B9PartSwitch swaps are honored
+            double fuelObtained = part.RequestResource(coolantResourceName, fuelDemand,
                 ResourceFlowMode.STAGE_PRIORITY_FLOW);
             float oxDemand = fuelDemand * (oxidizerRatio / fuelRatio);
-            double oxObtained = part.RequestResource(oxidizerResourceID, oxDemand,
+            double oxObtained = part.RequestResource(oxidizerResourceName, oxDemand,
                 ResourceFlowMode.STAGE_PRIORITY_FLOW);
 
             double fuelFraction = fuelDemand > 0 ? fuelObtained / fuelDemand : 0;

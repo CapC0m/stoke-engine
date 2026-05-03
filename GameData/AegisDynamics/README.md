@@ -36,6 +36,10 @@ During reentry, active cooling activates automatically when heat flux exceeds th
 
 
 ## Changelog
+## v0.3.5 - CryoTanks active cooling fix
+### CryoTanks active cooling fix
+Fixed a bug that disabled active cooling with CryoTanks
+
 ## v0.3.4 - CryoTanks fuel switch
 ### CryoTanks fuel switch
 Using CryoTanks will no longer force the engine to run on HydroLOx. KeroLOx and MethaLOx are added as options, with matching performances (probably not balanced perfectly) and Waterfall plumes (if installed)
