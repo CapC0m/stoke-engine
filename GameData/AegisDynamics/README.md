@@ -4,10 +4,13 @@ KSP 1.12 mod adding regen-cooled heatshield engines inspired by Stoke Space's An
 
 ## Features
 
-- **Single TweakScalable engine** (1.25m to 7.5m) replacing five fixed variants
+- **Thureos engine + heatshield part** (setup for 1.25m to 7.5m via TweakScale)
 - **Adjustable chamber count** (6 to 36), each chamber adds thrust and mass
 - **Active heatshield cooling** (burns propellant during reentry to absorb heat)
-- **Stock gimbal TVC** with slight thrust reduction during gimbal action
+- **Differential throttle TVC** with slight thrust reduction during "gimbal" action
+
+- **Akron booster engine**, basically a smaller, MethaLOx-balanced Vector engine (re-using stock or ReStock's models for now)
+
 - **CryoTanks compatibility**, all three fuel modes are implemented, complete with dedicated Waterfall plumes
 - **ReStock compatibility** (adjusted attach node positioning)
 
@@ -33,9 +36,25 @@ The Aegis Thureos appears in the Engines tab of the VAB. Place it as the bottom 
 
 During reentry, active cooling activates automatically when heat flux exceeds the threshold. It draws from your craft's LiquidFuel and Oxidizer reserves at the engine's mixture ratio.
 
+The Akron engine may be used as a first stage booster engine, just like any other (especially the stock Vector)
+
 
 
 ## Changelog
+## v0.4.0 — Akron Booster Engine
+### Added
+- **Aegis Akron** — new methalox-first first-stage engine, designed to cluster. Inspired by Stoke Space's Zenith. Single bell with gimbal TVC, scaling from 0.625m to 2.5m via TweakScale. Three fuel modes via B9PartSwitch (Methalox default with CryoTanks, Kerolox fallback, Hydrolox optional). Cloned from Vector with adjusted mass, thrust, and propellant tuning. Per-fuel Waterfall plumes when Waterfall is installed.
+
+### Changed
+- **Thureos**
+    - Hydrolox is now the default fuel mode when CryoTanks is installed (was Kerolox). Kerolox remains the fallback default without CryoTanks.
+    - Thrust per chamber reduced ~1.5x across all fuel modes. Engine is now better balanced for use as a returning upper-stage engine rather than a primary booster (hopefully).
+
+### Fixed
+- Active cooling now correctly drains the right propellant when fuel mode is changed via B9PartSwitch. Previously cooling would silently fail for non-default fuel modes, causing heatshield destruction during reentry.
+- Engine thrust now correctly scales with chamber count in flight. Previously B9PartSwitch's subtype application would reset maxThrust to the cfg default after OnStart, leaving the engine stuck at 18-chamber thrust regardless of the slider's actual value.
+- MechJeb and the VAB info now show consistent TWR values in flight after chamber count changes (we now fire `onVesselWasModified` so cached engine data in third-party mods refreshes correctly).
+
 ## v0.3.5 - CryoTanks active cooling fix
 ### CryoTanks active cooling fix
 Fixed a bug that disabled active cooling with CryoTanks

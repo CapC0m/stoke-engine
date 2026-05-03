@@ -37,6 +37,7 @@ namespace AegisDynamics
         private float lastBuiltRadius = -1f;
         private float lastRescaleIsp = -1f;
         private List<float> chamberAngles = new List<float>();
+        private bool firedVesselModified = false;
 
         // Cache of original Waterfall FX scales, indexed [plumeIndex][fxChildIndex]
         private Vector3[][] waterfallOriginalScales;
@@ -47,9 +48,9 @@ namespace AegisDynamics
         public override void OnStart(StartState state)
         {
             BuildRing();
+            ConfigureThrust();
             base.OnStart(state);
             BindThrustTransforms();
-            ConfigureThrust();
         }
 
         public void Update()
@@ -189,6 +190,14 @@ namespace AegisDynamics
             if (model == null) return;
             Transform anchor = model.Find(GIMBAL_ANCHOR_NAME);
             if (anchor == null) return;
+
+            int n = Mathf.Max(1, (int)chamberCount);
+            maxThrust = thrustPerChamber * n;
+            if (!firedVesselModified && HighLogic.LoadedSceneIsFlight && vessel != null && vessel.loaded)
+            {
+                GameEvents.onVesselWasModified.Fire(vessel);
+                firedVesselModified = true;
+            }
 
             Quaternion defaultRot = Quaternion.Euler(90f, 0f, 0f);
             Quaternion currentRot = anchor.localRotation;
